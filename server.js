@@ -1,10 +1,13 @@
+// import inquirer for prompting user with questions in terminal
 const inquirer = require('inquirer');
 
+// import classes
 const Departments = require('./lib/classes/Departments');
 const Roles = require('./lib/classes/Roles');
 const Employees = require('./lib/classes/Employees');
 
-const startUpQuestion = [
+// options the user can choose from upon startup
+const startUpQuestions = [
     {
         type: 'list',
         name: 'actionDecision',
@@ -13,6 +16,7 @@ const startUpQuestion = [
     }
 ]
 
+// run when user chooses to add an employee
 const createEmployee = [
     {
         type: 'input',
@@ -61,6 +65,7 @@ const createEmployee = [
     }
 ]
 
+// run when user chooses to create a new department
 const createDepartment = [
     {
         type: 'input',
@@ -76,3 +81,68 @@ const createDepartment = [
         }
     }
 ]
+
+// run when user chooses to create a new role
+const createRole = [
+    {
+        type: 'input',
+        name: 'role_name',
+        message: 'Please enter the name of the new role: ',
+        validate: role_name => {
+            if(name) {
+                return true;
+            } else {
+                console.log('Please enter a valid role name.');
+                return false;
+            }
+        }
+    },
+    {
+        type: 'input',
+        name: 'salary',
+        message: 'Please enter the salary for your new role: '
+    },
+    {
+        type: 'list',
+        name: 'department',
+        message: 'Please enter the department that the role is a part of: ',
+        choices: async () => {
+            let getDepartments = new Departments();
+            return await getDepartments.getDepartmentNames();
+        }
+    }
+]
+
+// run when user chooses to view employees list
+const employeeList = [
+    {
+        type: 'list',
+        name: 'employees',
+        message: 'Please select which employee you would like to edit: ',
+        choices: async () => {
+            let getEmployees = new Employees();
+            const employeeList = await getEmployees.getAllEmployees();
+            return employeeList
+        }
+    },
+    {
+        type: 'list',
+        name: 'employee_departments',
+        message: 'Please enter the department of the employee: ',
+        choices: async () => {
+            let getDepartments = new Departments();
+            return await getDepartments.getDepartmentNames();
+        }
+    }
+]
+
+init = () => {
+    console.log(data);
+    start();
+}
+
+const start = async () => {
+    inquirer.prompt(startUpQuestions)
+    .then(data => choices(data))
+    .catch(error => console.log(error))
+}
