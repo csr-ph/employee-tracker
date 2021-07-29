@@ -136,13 +136,11 @@ const employeeList = [
     }
 ]
 
-init = () => {
-    console.log(data);
-    start();
-}
 
 const start = async () => {
     inquirer.prompt(startUpQuestions)
     .then(data => choices(data))
     .catch(error => console.log(error))
 }
+
+start();
