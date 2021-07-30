@@ -6,6 +6,10 @@ const Departments = require('./lib/classes/Departments');
 const Roles = require('./lib/classes/Roles');
 const Employees = require('./lib/classes/Employees');
 
+let newEmployee = new Employees();
+let newRole = new Roles();
+let newDepartment = new Departments();
+
 // options the user can choose from upon startup
 const startUpQuestions = [
     {
@@ -82,7 +86,6 @@ const createDepartment = [
     }
 ]
 
-// run when user chooses to create a new role
 const createRole = [
     {
         type: 'input',
@@ -113,7 +116,6 @@ const createRole = [
     }
 ]
 
-// run when user chooses to view employees list
 const employeeList = [
     {
         type: 'list',
@@ -136,11 +138,142 @@ const employeeList = [
     }
 ]
 
-
 const start = async () => {
-    inquirer.prompt(startUpQuestions)
-    .then(data => choices(data))
+    inquirer
+    .prompt(startUpQuestions)
+    .then(data => userQuestions(data))
     .catch(error => console.log(error))
 }
 
-start();
+const userQuestions = async (answer) => {
+    switch(answer.viewAddOrUpdate) {
+        case 'View all departments':
+            await showDepartments();
+            break;
+        case 'View all roles':
+            await showRoles();
+            break;
+        case 'View all employees':
+            await showEmployees();
+            break;
+        case 'Add a department':
+            inquire
+            .prompt(addDepartmentQuestions)
+            .then(data => addNewDepartment(data))
+            .catch(error => error);
+            break;
+        case 'Add a role':
+            inquire
+            .prompt(addRoleQuestions)
+            .then(data => addNewRole(data))
+            .catch(error => error);
+            break;
+        case 'Add an employee':
+            inquire
+            .prompt(addEmployeeQuestions)
+            .then(data => addNewEmployee(data))
+            .catch(error => error)
+            break;
+        case 'Update employee role':
+            await updateEmployeeRole();
+    }
+}
+
+const showDepartments = async () => {
+    try {
+        await newDepartment.getAllDepartments();
+        setTimeout(startApp, 1000)
+    } catch (error) {
+        console.log(error)
+    }
+  }
+  
+  const showRoles = async () => {
+    try {
+        await newRole.getAllRoles();
+        setTimeout(startApp, 1000)
+    } catch (error) {
+        console.log(error)
+    }
+  }
+  
+  const showEmployees = async () => {
+    try {
+        await newEmployee.getAllEmployees();
+        setTimeout(startApp, 1000);
+        
+    } catch (error) {
+        console.log(error)
+    }
+  }
+  
+  const addNewDepartment = async (data) => {
+    try {
+        await newDepartment.addDepartment(data)
+  
+        setTimeout(startApp, 1000)
+       
+   } catch (error) {
+       console.log('Failed to add a new department.')
+    }
+  }
+  
+  const addNewRole = async (data) => {
+    try {  
+        await newRole.addRole(data);
+    
+        setTimeout(startApp, 1000)
+        
+    } catch (error) {
+       console.log('Failed to add a new Role.') 
+    }
+  }
+  
+  const addNewEmployee = async (data) => {
+    try {        
+        
+        const rolesChoices = await newRole.getRoleNames(data.department)
+        
+        const {role} = await inquire.prompt([
+            {   
+                type: 'list',
+                name: 'role',
+                message: 'Enter the new role of the employee:',
+                choices: rolesChoices
+            }
+        ])
+        
+        await newEmployee.addEmployee(data, role);
+        setTimeout(startApp, 1000)
+    } catch (error) {
+        console.log('Failed to add a new employee.')
+    }
+  }
+  
+  const updateEmployeeRole = async () => {
+    try {
+        const name = await inquire.prompt(listofEmployees)
+  
+        let splitName = name.employee.split(' ')
+        
+        const rolesChoices = await newRole.getRoleNames(name.department)
+        
+        const {role} = await inquire.prompt([
+            {
+                type: 'list',
+                name: 'role',
+                message: "Enter the employee's role:",
+                choices: rolesChoices
+            }
+        ])
+  
+        
+        await newEmployee.updateEmployeeRoleinDB(role, splitName, name.department)
+        
+        setTimeout(startApp, 1000);
+    } catch (error) {
+        console.log('Was unable to update employee role.')
+    }
+  }
+  
+  start();
